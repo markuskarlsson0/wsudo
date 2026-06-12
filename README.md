@@ -2,6 +2,18 @@
 
 A sudo-like utility for running commands with administrator privileges on Windows.
 
+## Usage
+
+```
+wsudo [options] {command}
+```
+
+### Options
+
+| Short Option | Long Option | Description |
+|---|---|---|
+| `-h` | `--help` | Display help message |
+
 ## Development
 
 ### Requirements

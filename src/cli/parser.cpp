@@ -35,7 +35,14 @@ std::string join(const std::vector<std::string>& arguments) {
 Arguments parse(int argc, char* argv[]) {
     Arguments arguments;
     std::vector<std::string> splitArguments = split(argc, argv);
-    arguments.command = join(splitArguments);
+    std::string argument0 = splitArguments.empty() ? "" : splitArguments[0];
+
+    if (argument0 == "-h" || argument0 == "--help") {
+        arguments.help = true;
+    } else {
+        arguments.command = join(splitArguments);
+    }
+
     return arguments;
 }
 
