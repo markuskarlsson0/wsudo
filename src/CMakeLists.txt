@@ -5,6 +5,8 @@ target_sources(wsudo
         main.cpp
 )
 
+add_subdirectory(cli)
+
 target_include_directories(wsudo
     PRIVATE
         ${PROJECT_SOURCE_DIR}/include
