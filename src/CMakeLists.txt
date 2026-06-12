@@ -5,6 +5,8 @@ target_sources(wsudo
         main.cpp
 )
 
+add_subdirectory(cli)
+
 target_include_directories(wsudo
     PRIVATE
         ${PROJECT_SOURCE_DIR}/include
@@ -20,7 +22,21 @@ target_compile_definitions(wsudo
 )
 
 if(MSVC)
-    target_compile_options(wsudo PRIVATE /W4 $<$<NOT:$<CONFIG:Debug>>:/WX> /permissive-)
+    target_compile_options(wsudo
+        PRIVATE
+            /W4
+            /permissive-
+            $<$<NOT:$<CONFIG:Debug>>:/WX>
+    )
 else()
-    target_compile_options(wsudo PRIVATE -Wall -Wextra -Wpedantic $<$<NOT:$<CONFIG:Debug>>:-Werror> -Wshadow -Wconversion -Wsign-conversion)
+    target_compile_options(wsudo
+        PRIVATE
+            -Wall
+            -Wextra
+            -Wpedantic
+            -Wshadow
+            -Wconversion
+            -Wsign-conversion
+            $<$<NOT:$<CONFIG:Debug>>:-Werror>
+    )
 endif()
