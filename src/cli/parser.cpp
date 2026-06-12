@@ -39,6 +39,8 @@ Arguments parse(int argc, char* argv[]) {
 
     if (argument0 == "-h" || argument0 == "--help") {
         arguments.help = true;
+    } else if (argument0 == "-v" || argument0 == "--version") {
+        arguments.version = true;
     } else {
         arguments.command = join(splitArguments);
     }

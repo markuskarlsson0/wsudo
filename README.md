@@ -13,6 +13,7 @@ wsudo [options] {command}
 | Short Option | Long Option | Description |
 |---|---|---|
 | `-h` | `--help` | Display help message |
+| `-v` | `--version` | Display version information |
 
 ## Development
 
