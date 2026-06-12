@@ -1,0 +1,93 @@
+{
+    "version": 6,
+    "cmakeMinimumRequired": {
+        "major": 3,
+        "minor": 25,
+        "patch": 0
+    },
+    "configurePresets": [
+        {
+            "name": "base",
+            "hidden": true,
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build/${presetName}",
+            "cacheVariables": {
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+            }
+        },
+        {
+            "name": "base-x64",
+            "hidden": true,
+            "inherits": "base",
+            "architecture": {
+                "value": "x64",
+                "strategy": "external"
+            },
+            "cacheVariables": {
+                "WSUDO_TARGET_ARCH": "x64"
+            }
+        },
+        {
+            "name": "base-x86",
+            "hidden": true,
+            "inherits": "base",
+            "architecture": {
+                "value": "x86",
+                "strategy": "external"
+            },
+            "cacheVariables": {
+                "WSUDO_TARGET_ARCH": "x86"
+            }
+        },
+        {
+            "name": "debug-x64",
+            "displayName": "Debug x64",
+            "inherits": "base-x64",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        },
+        {
+            "name": "debug-x86",
+            "displayName": "Debug x86",
+            "inherits": "base-x86",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        },
+        {
+            "name": "release-x64",
+            "displayName": "Release x64",
+            "inherits": "base-x64",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release"
+            }
+        },
+        {
+            "name": "release-x86",
+            "displayName": "Release x86",
+            "inherits": "base-x86",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "debug-x64",
+            "configurePreset": "debug-x64"
+        },
+        {
+            "name": "debug-x86",
+            "configurePreset": "debug-x86"
+        },
+        {
+            "name": "release-x64",
+            "configurePreset": "release-x64"
+        },
+        {
+            "name": "release-x86",
+            "configurePreset": "release-x86"
+        }
+    ]
+}
