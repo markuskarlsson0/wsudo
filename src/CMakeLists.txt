@@ -6,6 +6,7 @@ target_sources(wsudo
 )
 
 add_subdirectory(cli)
+add_subdirectory(utils)
 
 target_include_directories(wsudo
     PRIVATE
