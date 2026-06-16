@@ -6,6 +6,9 @@ target_sources(wsudo
 )
 
 add_subdirectory(cli)
+add_subdirectory(utils)
+add_subdirectory(app)
+add_subdirectory(process)
 
 target_include_directories(wsudo
     PRIVATE
