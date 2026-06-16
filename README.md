@@ -2,6 +2,39 @@
 
 A sudo-like utility for running commands with administrator privileges on Windows.
 
+## Usage
+
+```
+wsudo [options] {command}
+```
+
+### Options
+
+| Short Option | Long Option | Description |
+|---|---|---|
+| `-h` | `--help` | Display help message |
+| `-v` | `--version` | Display version information |
+
+### Examples
+
+Start an administrator session in the current console:
+
+```
+wsudo
+```
+
+Exit administrator session:
+
+```
+exit
+```
+
+Run a command as administrator:
+
+```
+wsudo taskkill /f /im program.exe
+```
+
 ## Development
 
 ### Requirements
