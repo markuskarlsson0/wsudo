@@ -1,4 +1,7 @@
 #include "cli/parser.h"
+#include <Windows.h>
+#include <cstddef>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -16,11 +19,11 @@ std::vector<std::string> split(int argc, char* argv[]) {
     return arguments;
 }
 
-std::string join(const std::vector<std::string>& arguments) {
+std::string join(const std::vector<std::string>& arguments, std::size_t startOffset = 0) {
     std::string combined;
 
-    for (size_t i = 0; i < arguments.size(); i++) {
-        if (i != 0) {
+    for (std::size_t i = startOffset; i < arguments.size(); i++) {
+        if (i != startOffset) {
             combined += " ";
         }
 
@@ -37,7 +40,15 @@ Arguments parse(int argc, char* argv[]) {
     std::vector<std::string> splitArguments = split(argc, argv);
     std::string argument0 = splitArguments.empty() ? "" : splitArguments[0];
 
-    if (argument0 == "-h" || argument0 == "--help") {
+    if (argument0 == "--backend") {
+        if (splitArguments.size() < 3 || splitArguments[1].empty() || splitArguments[2].empty()) {
+            throw std::runtime_error("Invalid backend arguments");
+        }
+
+        arguments.command = join(splitArguments, 2);
+        arguments.processId = static_cast<DWORD>(std::stoul(splitArguments[1]));
+        arguments.backend = true;
+    } else if (argument0 == "-h" || argument0 == "--help") {
         arguments.help = true;
     } else if (argument0 == "-v" || argument0 == "--version") {
         arguments.version = true;
