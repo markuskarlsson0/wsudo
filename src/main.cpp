@@ -6,7 +6,7 @@
 #include "utils/log.h"
 #include <exception>
 
-int main(int argc, char* argv[]) try {
+int wmain(int argc, wchar_t* argv[]) try {
     cli::Arguments arguments = cli::parse(argc, argv);
 
     if (arguments.help) {

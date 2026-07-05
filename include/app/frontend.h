@@ -6,10 +6,10 @@ namespace app {
 
 class Frontend {
   public:
-    Frontend(const std::string& command);
+    Frontend(const std::wstring& command);
 
   private:
-    std::string getFilePath();
+    std::wstring getFilePath();
 };
 
 } // namespace app
