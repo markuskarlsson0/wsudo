@@ -6,13 +6,13 @@
 namespace cli {
 
 struct Arguments {
-    std::string command;
+    std::wstring command;
     DWORD processId;
     bool backend = false;
     bool help = false;
     bool version = false;
 };
 
-Arguments parse(int argc, char* argv[]);
+Arguments parse(int argc, wchar_t* argv[]);
 
 } // namespace cli

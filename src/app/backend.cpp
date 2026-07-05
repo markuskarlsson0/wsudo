@@ -12,7 +12,7 @@
 
 namespace app {
 
-Backend::Backend(DWORD processId, const std::string& command) {
+Backend::Backend(DWORD processId, const std::wstring& command) {
     process::Remote frontend(processId);
     frontend.open();
     frontend.connectToConsole();
@@ -23,7 +23,7 @@ Backend::Backend(DWORD processId, const std::string& command) {
     std::thread thread(&Backend::wait, this, std::ref(frontend));
     thread.detach();
 
-    std::string startCommand = std::format("cmd.exe /c {}", command);
+    std::wstring startCommand = std::format(L"cmd.exe /c {}", command);
 
     process::Console console(startCommand);
     console.start();

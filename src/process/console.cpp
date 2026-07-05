@@ -5,7 +5,7 @@
 
 namespace process {
 
-Console::Console(const std::string& command) : command_(command) {
+Console::Console(const std::wstring& command) : command_(command) {
     createJob();
     configureJob();
     createProcess();
@@ -51,12 +51,13 @@ void Console::configureJob() {
 }
 
 void Console::createProcess() {
-    STARTUPINFOA si = {};
+    STARTUPINFOW si = {};
     si.cb = sizeof(si);
     PROCESS_INFORMATION pi = {};
 
-    BOOL result = CreateProcessA(NULL, command_.data(), NULL, NULL, FALSE, CREATE_SUSPENDED, NULL,
-                                 NULL, &si, &pi);
+    std::wstring commandLine = command_;
+    BOOL result = CreateProcessW(NULL, commandLine.data(), NULL, NULL, FALSE, CREATE_SUSPENDED,
+                                 NULL, NULL, &si, &pi);
 
     if (!result) {
         throw utils::Exception("Failed to create process", GetLastError());

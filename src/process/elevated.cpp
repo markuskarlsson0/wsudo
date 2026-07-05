@@ -4,19 +4,19 @@
 
 namespace process {
 
-Elevated::Elevated(const std::string& filePath, const std::string& command)
+Elevated::Elevated(const std::wstring& filePath, const std::wstring& command)
     : filePath_(filePath), command_(command) {}
 
 bool Elevated::start() {
-    SHELLEXECUTEINFOA sei = {};
+    SHELLEXECUTEINFOW sei = {};
     sei.cbSize = sizeof(sei);
     sei.fMask = SEE_MASK_NOCLOSEPROCESS;
-    sei.lpVerb = "runas";
+    sei.lpVerb = L"runas";
     sei.lpFile = filePath_.c_str();
     sei.lpParameters = command_.c_str();
     sei.nShow = SW_HIDE;
 
-    BOOL result = ShellExecuteExA(&sei);
+    BOOL result = ShellExecuteExW(&sei);
 
     if (!result) {
         return false;
