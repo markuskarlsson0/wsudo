@@ -7,12 +7,12 @@ namespace process {
 
 class Elevated : public Process {
   public:
-    Elevated(const std::string& filePath, const std::string& command);
+    Elevated(const std::wstring& filePath, const std::wstring& command);
     bool start();
 
   private:
-    std::string filePath_;
-    std::string command_;
+    std::wstring filePath_;
+    std::wstring command_;
 };
 
 } // namespace process

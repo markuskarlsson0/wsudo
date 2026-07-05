@@ -8,7 +8,7 @@ namespace process {
 
 class Console : public Process {
   public:
-    Console(const std::string& command);
+    Console(const std::wstring& command);
     static void setCtrlHandler();
     void start();
 
@@ -21,7 +21,7 @@ class Console : public Process {
 
     utils::Handle jobHandle_;
     utils::Handle threadHandle_;
-    std::string command_;
+    std::wstring command_;
 };
 
 } // namespace process

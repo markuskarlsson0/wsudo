@@ -9,8 +9,8 @@ namespace cli {
 
 namespace {
 
-std::vector<std::string> split(int argc, char* argv[]) {
-    std::vector<std::string> arguments;
+std::vector<std::wstring> split(int argc, wchar_t* argv[]) {
+    std::vector<std::wstring> arguments;
 
     for (int i = 1; i < argc; i++) {
         arguments.push_back(argv[i]);
@@ -19,12 +19,12 @@ std::vector<std::string> split(int argc, char* argv[]) {
     return arguments;
 }
 
-std::string join(const std::vector<std::string>& arguments, std::size_t startOffset = 0) {
-    std::string combined;
+std::wstring join(const std::vector<std::wstring>& arguments, std::size_t startOffset = 0) {
+    std::wstring combined;
 
     for (std::size_t i = startOffset; i < arguments.size(); i++) {
         if (i != startOffset) {
-            combined += " ";
+            combined += L" ";
         }
 
         combined += arguments[i];
@@ -35,12 +35,12 @@ std::string join(const std::vector<std::string>& arguments, std::size_t startOff
 
 } // namespace
 
-Arguments parse(int argc, char* argv[]) {
+Arguments parse(int argc, wchar_t* argv[]) {
     Arguments arguments;
-    std::vector<std::string> splitArguments = split(argc, argv);
-    std::string argument0 = splitArguments.empty() ? "" : splitArguments[0];
+    std::vector<std::wstring> splitArguments = split(argc, argv);
+    std::wstring argument0 = splitArguments.empty() ? L"" : splitArguments[0];
 
-    if (argument0 == "--backend") {
+    if (argument0 == L"--backend") {
         if (splitArguments.size() < 3 || splitArguments[1].empty() || splitArguments[2].empty()) {
             throw std::runtime_error("Invalid backend arguments");
         }
@@ -48,9 +48,9 @@ Arguments parse(int argc, char* argv[]) {
         arguments.command = join(splitArguments, 2);
         arguments.processId = static_cast<DWORD>(std::stoul(splitArguments[1]));
         arguments.backend = true;
-    } else if (argument0 == "-h" || argument0 == "--help") {
+    } else if (argument0 == L"-h" || argument0 == L"--help") {
         arguments.help = true;
-    } else if (argument0 == "-v" || argument0 == "--version") {
+    } else if (argument0 == L"-v" || argument0 == L"--version") {
         arguments.version = true;
     } else {
         arguments.command = join(splitArguments);

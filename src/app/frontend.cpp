@@ -9,15 +9,15 @@
 
 namespace app {
 
-Frontend::Frontend(const std::string& command) {
+Frontend::Frontend(const std::wstring& command) {
     // Ignore all ctrl commands so that they can be forwarded to the console process
     process::Console::setCtrlHandler();
 
-    std::string filePath = getFilePath();
+    std::wstring filePath = getFilePath();
     DWORD processId = GetCurrentProcessId();
 
-    std::string startCommand =
-        std::format("--backend {} {}", processId, command.empty() ? "cmd.exe /k" : command);
+    std::wstring startCommand =
+        std::format(L"--backend {} {}", processId, command.empty() ? L"cmd.exe /k" : command);
 
     process::Elevated backend(filePath, startCommand);
     bool result = backend.start();
@@ -27,9 +27,9 @@ Frontend::Frontend(const std::string& command) {
     }
 }
 
-std::string Frontend::getFilePath() {
-    char filePath[MAX_PATH];
-    DWORD length = GetModuleFileNameA(NULL, filePath, MAX_PATH);
+std::wstring Frontend::getFilePath() {
+    wchar_t filePath[MAX_PATH];
+    DWORD length = GetModuleFileNameW(NULL, filePath, MAX_PATH);
 
     if (length == 0) {
         throw utils::Exception("Failed to get file path", GetLastError());
