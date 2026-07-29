@@ -51,3 +51,12 @@ cmake --build --preset debug-x64
 ```
 
 Other build configurations are available in `CMakePresets.json`.
+
+### Test
+
+```sh
+cmake --build --preset debug-x64
+ctest --preset debug-x64
+```
+
+Other test configurations are available in `CMakePresets.json`.

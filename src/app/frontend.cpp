@@ -1,9 +1,10 @@
 #include "app/frontend.h"
+#include "ipc/data/data.h"
+#include "ipc/pipe/host.h"
 #include "process/console.h"
 #include "process/elevated.h"
 #include "utils/exception.h"
 #include <Windows.h>
-#include <format>
 #include <stdexcept>
 #include <string>
 
@@ -15,14 +16,15 @@ Frontend::Frontend(const std::wstring& command) {
 
     std::wstring filePath = getFilePath();
     DWORD processId = GetCurrentProcessId();
+    std::wstring pipeName;
+    ipc::pipe::Host pipe(pipeName);
 
-    std::wstring startCommand =
-        std::format(L"--backend {} {}", processId, command.empty() ? L"cmd.exe /k" : command);
-
-    process::Elevated backend(filePath, startCommand);
+    process::Elevated backend(filePath, pipeName);
     bool result = backend.start();
 
     if (result) {
+        pipe.waitForConnection();
+        pipe.send(ipc::data::Data(processId, command));
         backend.wait();
     }
 }

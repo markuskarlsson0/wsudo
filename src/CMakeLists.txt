@@ -9,6 +9,7 @@ add_subdirectory(cli)
 add_subdirectory(utils)
 add_subdirectory(app)
 add_subdirectory(process)
+add_subdirectory(ipc)
 
 target_include_directories(wsudo
     PRIVATE
@@ -24,22 +25,7 @@ target_compile_definitions(wsudo
         WSUDO_TARGET_ARCH="${WSUDO_TARGET_ARCH}"
 )
 
-if(MSVC)
-    target_compile_options(wsudo
-        PRIVATE
-            /W4
-            /permissive-
-            $<$<NOT:$<CONFIG:Debug>>:/WX>
-    )
-else()
-    target_compile_options(wsudo
-        PRIVATE
-            -Wall
-            -Wextra
-            -Wpedantic
-            -Wshadow
-            -Wconversion
-            -Wsign-conversion
-            $<$<NOT:$<CONFIG:Debug>>:-Werror>
-    )
-endif()
+target_link_libraries(wsudo
+    PRIVATE
+        wsudo_warnings
+)
