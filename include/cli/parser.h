@@ -1,13 +1,12 @@
 #pragma once
 
-#include <Windows.h>
 #include <string>
 
 namespace cli {
 
 struct Arguments {
     std::wstring command;
-    DWORD processId;
+    std::wstring pipeName;
     bool backend = false;
     bool help = false;
     bool version = false;

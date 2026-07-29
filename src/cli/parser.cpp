@@ -1,5 +1,4 @@
 #include "cli/parser.h"
-#include <Windows.h>
 #include <cstddef>
 #include <stdexcept>
 #include <string>
@@ -39,14 +38,14 @@ Arguments parse(int argc, wchar_t* argv[]) {
     Arguments arguments;
     std::vector<std::wstring> splitArguments = split(argc, argv);
     std::wstring argument0 = splitArguments.empty() ? L"" : splitArguments[0];
+    std::wstring backendPipePrefix = LR"(\\.\pipe\wsudo\)";
 
-    if (argument0 == L"--backend") {
-        if (splitArguments.size() < 3 || splitArguments[1].empty() || splitArguments[2].empty()) {
-            throw std::runtime_error("Invalid backend arguments");
+    if (splitArguments.size() == 1 && argument0.starts_with(backendPipePrefix)) {
+        if (argument0.size() == backendPipePrefix.size()) {
+            throw std::runtime_error("Invalid pipe name");
         }
 
-        arguments.command = join(splitArguments, 2);
-        arguments.processId = static_cast<DWORD>(std::stoul(splitArguments[1]));
+        arguments.pipeName = argument0;
         arguments.backend = true;
     } else if (argument0 == L"-h" || argument0 == L"--help") {
         arguments.help = true;

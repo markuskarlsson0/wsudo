@@ -14,7 +14,7 @@ int wmain(int argc, wchar_t* argv[]) try {
     } else if (arguments.version) {
         cli::version();
     } else if (arguments.backend) {
-        app::Backend backend(arguments.processId, arguments.command);
+        app::Backend backend(arguments.pipeName);
     } else {
         app::Frontend frontend(arguments.command);
     }
