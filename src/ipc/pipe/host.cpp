@@ -12,7 +12,6 @@ namespace ipc::pipe {
 namespace {
 
 constexpr int createPipeAttempts = 5;
-constexpr DWORD connectionTimeoutMs = 30000;
 
 } // namespace
 
@@ -32,13 +31,7 @@ void Host::waitForConnection() {
 
         if (error == ERROR_IO_PENDING) {
             DWORD bytes = 0;
-            DWORD waitResult = WaitForSingleObject(overlapped.hEvent, connectionTimeoutMs);
-
-            if (waitResult == WAIT_TIMEOUT) {
-                CancelIoEx(pipe_, &overlapped);
-                GetOverlappedResult(pipe_, &overlapped, &bytes, TRUE);
-                throw std::runtime_error("Timed out waiting for pipe connection");
-            }
+            DWORD waitResult = WaitForSingleObject(overlapped.hEvent, INFINITE);
 
             if (waitResult != WAIT_OBJECT_0) {
                 throw utils::Exception("Failed to wait for pipe connection", GetLastError());

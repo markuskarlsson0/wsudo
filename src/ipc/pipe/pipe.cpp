@@ -7,12 +7,6 @@
 
 namespace ipc::pipe {
 
-namespace {
-
-constexpr DWORD ioTimeoutMs = 30000;
-
-} // namespace
-
 void Pipe::send(const data::Data& data) {
     io(data::dataSize, [pipeHandle = HANDLE(pipe_), &data](DWORD& bytes, OVERLAPPED& overlapped) {
         return WriteFile(pipeHandle, &data, data::dataSize, &bytes, &overlapped);
@@ -47,13 +41,7 @@ void Pipe::io(DWORD expectedBytes,
         DWORD error = GetLastError();
 
         if (error == ERROR_IO_PENDING) {
-            DWORD waitResult = WaitForSingleObject(overlapped.hEvent, ioTimeoutMs);
-
-            if (waitResult == WAIT_TIMEOUT) {
-                CancelIoEx(pipe_, &overlapped);
-                GetOverlappedResult(pipe_, &overlapped, &bytes, TRUE);
-                throw std::runtime_error("Timed out waiting for pipe operation");
-            }
+            DWORD waitResult = WaitForSingleObject(overlapped.hEvent, INFINITE);
 
             if (waitResult != WAIT_OBJECT_0) {
                 throw utils::Exception("Failed to wait for pipe operation", GetLastError());
