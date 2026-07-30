@@ -3,10 +3,17 @@
 #include "cli/help.h"
 #include "cli/parser.h"
 #include "cli/version.h"
+#include "utils/debug.h"
 #include "utils/log.h"
 #include <exception>
 
 int wmain(int argc, wchar_t* argv[]) try {
+    bool debug = utils::consumeDebugFlag(argc, argv);
+
+    if (debug) {
+        utils::waitForDebugger();
+    }
+
     cli::Arguments arguments = cli::parse(argc, argv);
 
     if (arguments.help) {
@@ -16,7 +23,7 @@ int wmain(int argc, wchar_t* argv[]) try {
     } else if (arguments.backend) {
         app::Backend backend(arguments.pipeName);
     } else {
-        app::Frontend frontend(arguments.command);
+        app::Frontend frontend(arguments.command, debug);
     }
 
     return 0;
