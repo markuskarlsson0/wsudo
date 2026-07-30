@@ -1,14 +1,12 @@
 #include "ipc/pipe/client.h"
 #include "utils/exception.h"
 #include <Windows.h>
-#include <stdexcept>
 #include <string>
 
 namespace ipc::pipe {
 
 namespace {
 
-constexpr DWORD openTimeoutMs = 30000;
 constexpr DWORD openRetryDelayMs = 100;
 
 } // namespace
@@ -16,9 +14,7 @@ constexpr DWORD openRetryDelayMs = 100;
 Client::Client(const std::wstring& pipeName) { open(pipeName); }
 
 void Client::open(const std::wstring& pipeName) {
-    DWORD64 start = GetTickCount64();
-
-    while (GetTickCount64() - start < openTimeoutMs) {
+    while (true) {
         pipe_ = CreateFileW(pipeName.c_str(), GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING,
                             FILE_FLAG_OVERLAPPED, NULL);
 
@@ -42,8 +38,6 @@ void Client::open(const std::wstring& pipeName) {
             return;
         }
     }
-
-    throw std::runtime_error("Timed out waiting for pipe");
 }
 
 } // namespace ipc::pipe
