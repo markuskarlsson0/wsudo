@@ -6,7 +6,7 @@ namespace app {
 
 class Frontend {
   public:
-    Frontend(const std::wstring& command);
+    Frontend(const std::wstring& command, bool debug = false);
 
   private:
     std::wstring getFilePath();

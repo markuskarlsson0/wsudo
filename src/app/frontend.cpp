@@ -10,7 +10,7 @@
 
 namespace app {
 
-Frontend::Frontend(const std::wstring& command) {
+Frontend::Frontend(const std::wstring& command, bool debug) {
     // Ignore all ctrl commands so that they can be forwarded to the console process
     process::Console::setCtrlHandler();
 
@@ -19,7 +19,9 @@ Frontend::Frontend(const std::wstring& command) {
     std::wstring pipeName;
     ipc::pipe::Host pipe(pipeName);
 
-    process::Elevated backend(filePath, pipeName);
+    std::wstring parameters = debug ? L"--debug " + pipeName : pipeName;
+
+    process::Elevated backend(filePath, parameters);
     bool result = backend.start();
 
     if (result) {

@@ -23,6 +23,7 @@ target_compile_definitions(wsudo
         WSUDO_VERSION_PATCH=${PROJECT_VERSION_PATCH}
         WSUDO_VERSION_STRING="${PROJECT_VERSION}"
         WSUDO_TARGET_ARCH="${WSUDO_TARGET_ARCH}"
+        $<$<CONFIG:Debug>:WSUDO_DEBUG_BUILD>
 )
 
 target_link_libraries(wsudo
