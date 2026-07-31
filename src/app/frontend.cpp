@@ -10,7 +10,26 @@
 
 namespace app {
 
-Frontend::Frontend(const std::wstring& command, bool debug) {
+namespace {
+
+std::wstring getFilePath() {
+    wchar_t filePath[MAX_PATH];
+    DWORD length = GetModuleFileNameW(NULL, filePath, MAX_PATH);
+
+    if (length == 0) {
+        throw utils::Exception("Failed to get file path", GetLastError());
+    }
+
+    if (length >= MAX_PATH) {
+        throw std::runtime_error("File path is too long");
+    }
+
+    return filePath;
+}
+
+} // namespace
+
+void frontend(const std::wstring& command, bool debug) {
     // Ignore all ctrl commands so that they can be forwarded to the console process
     process::Console::setCtrlHandler();
 
@@ -29,21 +48,6 @@ Frontend::Frontend(const std::wstring& command, bool debug) {
         pipe.send(ipc::data::Data(processId, command));
         backend.wait();
     }
-}
-
-std::wstring Frontend::getFilePath() {
-    wchar_t filePath[MAX_PATH];
-    DWORD length = GetModuleFileNameW(NULL, filePath, MAX_PATH);
-
-    if (length == 0) {
-        throw utils::Exception("Failed to get file path", GetLastError());
-    }
-
-    if (length >= MAX_PATH) {
-        throw std::runtime_error("File path is too long");
-    }
-
-    return filePath;
 }
 
 } // namespace app
