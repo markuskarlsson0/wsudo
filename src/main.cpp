@@ -21,9 +21,9 @@ int wmain(int argc, wchar_t* argv[]) try {
     } else if (arguments.version) {
         cli::version();
     } else if (arguments.backend) {
-        app::Backend backend(arguments.pipeName);
+        app::backend(arguments.pipeName);
     } else {
-        app::Frontend frontend(arguments.command, debug);
+        app::frontend(arguments.command, debug);
     }
 
     return 0;
