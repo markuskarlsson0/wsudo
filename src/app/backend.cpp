@@ -4,7 +4,6 @@
 #include "process/console.h"
 #include "process/remote.h"
 #include "utils/log.h"
-#include <Windows.h>
 #include <cstdlib>
 #include <exception>
 #include <functional>
@@ -16,10 +15,13 @@ namespace app {
 namespace {
 
 std::wstring createCommand(const wchar_t* value) {
-    bool empty = value[0] == L'\0';
-    std::wstring command = L"cmd.exe /";
-    command += empty ? L"k" : L"c ";
+    if (value[0] == L'\0') {
+        return L"cmd.exe /k";
+    }
+
+    std::wstring command = LR"(cmd.exe /s /c ")";
     command += value;
+    command += L'"';
     return command;
 }
 

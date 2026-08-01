@@ -1,13 +1,17 @@
 #include "cli/parser.h"
 #include <gtest/gtest.h>
 
-TEST(ParserTest, ParsesBackendPipeName) {
-    wchar_t executable[] = L"wsudo";
-    wchar_t pipeName[] = LR"(\\.\pipe\wsudo\0123456789abcdef)";
-    wchar_t* argv[] = {executable, pipeName};
+namespace {
 
-    cli::Arguments arguments = cli::parse(2, argv);
+void expectCommand(const cli::Arguments& arguments, const std::wstring& command) {
+    EXPECT_EQ(arguments.command, command);
+    EXPECT_TRUE(arguments.pipeName.empty());
+    EXPECT_FALSE(arguments.backend);
+    EXPECT_FALSE(arguments.help);
+    EXPECT_FALSE(arguments.version);
+}
 
+void expectBackend(const cli::Arguments& arguments, const std::wstring& pipeName) {
     EXPECT_TRUE(arguments.backend);
     EXPECT_EQ(arguments.pipeName, pipeName);
     EXPECT_TRUE(arguments.command.empty());
@@ -15,113 +19,79 @@ TEST(ParserTest, ParsesBackendPipeName) {
     EXPECT_FALSE(arguments.version);
 }
 
-TEST(ParserTest, ParsesNoArgumentsAsEmptyCommand) {
-    wchar_t executable[] = L"wsudo";
-    wchar_t* argv[] = {executable};
-
-    cli::Arguments arguments = cli::parse(1, argv);
-
+void expectHelp(const cli::Arguments& arguments) {
+    EXPECT_TRUE(arguments.help);
     EXPECT_TRUE(arguments.command.empty());
+    EXPECT_TRUE(arguments.pipeName.empty());
     EXPECT_FALSE(arguments.backend);
-    EXPECT_FALSE(arguments.help);
     EXPECT_FALSE(arguments.version);
 }
 
-TEST(ParserTest, ParsesSingleWordCommand) {
-    wchar_t executable[] = L"wsudo";
-    wchar_t command[] = L"notepad.exe";
-    wchar_t* argv[] = {executable, command};
-
-    cli::Arguments arguments = cli::parse(2, argv);
-
-    EXPECT_EQ(arguments.command, L"notepad.exe");
+void expectVersion(const cli::Arguments& arguments) {
+    EXPECT_TRUE(arguments.version);
+    EXPECT_TRUE(arguments.command.empty());
+    EXPECT_TRUE(arguments.pipeName.empty());
     EXPECT_FALSE(arguments.backend);
     EXPECT_FALSE(arguments.help);
-    EXPECT_FALSE(arguments.version);
+}
+
+} // namespace
+
+TEST(ParserTest, ParsesBackendPipeName) {
+    std::wstring pipeName = LR"(\\.\pipe\wsudo\0123456789abcdef)";
+
+    expectBackend(cli::parse(L"wsudo " + pipeName), pipeName);
+}
+
+TEST(ParserTest, RejectsEmptyBackendPipeName) {
+    EXPECT_THROW(cli::parse(LR"(wsudo \\.\pipe\wsudo\)"), std::runtime_error);
+}
+
+TEST(ParserTest, ParsesNoArgumentsAsEmptyCommand) { expectCommand(cli::parse(L"wsudo"), L""); }
+
+TEST(ParserTest, ParsesSingleWordCommand) {
+    expectCommand(cli::parse(L"wsudo notepad.exe"), L"notepad.exe");
 }
 
 TEST(ParserTest, ParsesMultiWordCommand) {
-    wchar_t executable[] = L"wsudo";
-    wchar_t part1[] = L"cmd.exe";
-    wchar_t part2[] = L"/c";
-    wchar_t part3[] = L"echo";
-    wchar_t part4[] = L"test";
-    wchar_t* argv[] = {executable, part1, part2, part3, part4};
-
-    cli::Arguments arguments = cli::parse(5, argv);
-
-    EXPECT_EQ(arguments.command, L"cmd.exe /c echo test");
-    EXPECT_FALSE(arguments.backend);
+    expectCommand(cli::parse(L"wsudo echo test 123"), L"echo test 123");
 }
 
-TEST(ParserTest, ParsesShortHelpFlag) {
-    wchar_t executable[] = L"wsudo";
-    wchar_t flag[] = L"-h";
-    wchar_t* argv[] = {executable, flag};
-
-    cli::Arguments arguments = cli::parse(2, argv);
-
-    EXPECT_TRUE(arguments.help);
-    EXPECT_FALSE(arguments.version);
-    EXPECT_FALSE(arguments.backend);
-    EXPECT_TRUE(arguments.command.empty());
+TEST(ParserTest, KeepsQuotingOfCommand) {
+    expectCommand(cli::parse(LR"(wsudo echo "hello world")"), LR"(echo "hello world")");
 }
 
-TEST(ParserTest, ParsesLongHelpFlag) {
-    wchar_t executable[] = L"wsudo";
-    wchar_t flag[] = L"--help";
-    wchar_t* argv[] = {executable, flag};
-
-    cli::Arguments arguments = cli::parse(2, argv);
-
-    EXPECT_TRUE(arguments.help);
-    EXPECT_FALSE(arguments.version);
+TEST(ParserTest, SkipsQuotedExecutablePathContainingSpaces) {
+    expectCommand(cli::parse(LR"("C:\my dir\wsudo.exe" echo "hello world")"),
+                  LR"(echo "hello world")");
 }
 
-TEST(ParserTest, ParsesShortVersionFlag) {
-    wchar_t executable[] = L"wsudo";
-    wchar_t flag[] = L"-v";
-    wchar_t* argv[] = {executable, flag};
-
-    cli::Arguments arguments = cli::parse(2, argv);
-
-    EXPECT_TRUE(arguments.version);
-    EXPECT_FALSE(arguments.help);
-    EXPECT_FALSE(arguments.backend);
-    EXPECT_TRUE(arguments.command.empty());
+TEST(ParserTest, SkipsAllWhitespaceBeforeFirstArgument) {
+    expectCommand(cli::parse(L"wsudo   \t echo hello"), L"echo hello");
 }
 
-TEST(ParserTest, ParsesLongVersionFlag) {
-    wchar_t executable[] = L"wsudo";
-    wchar_t flag[] = L"--version";
-    wchar_t* argv[] = {executable, flag};
-
-    cli::Arguments arguments = cli::parse(2, argv);
-
-    EXPECT_TRUE(arguments.version);
-    EXPECT_FALSE(arguments.help);
+TEST(ParserTest, SkipsDebugFlagWhenItWasConsumed) {
+    expectCommand(cli::parse(LR"(wsudo --debug echo "hello world")", true),
+                  LR"(echo "hello world")");
 }
+
+TEST(ParserTest, KeepsDebugFlagWhenItWasNotConsumed) {
+    expectCommand(cli::parse(LR"(wsudo --debug echo "hello world")"),
+                  LR"(--debug echo "hello world")");
+}
+
+TEST(ParserTest, ParsesShortHelpFlag) { expectHelp(cli::parse(L"wsudo -h")); }
+
+TEST(ParserTest, ParsesLongHelpFlag) { expectHelp(cli::parse(L"wsudo --help")); }
+
+TEST(ParserTest, ParsesShortVersionFlag) { expectVersion(cli::parse(L"wsudo -v")); }
+
+TEST(ParserTest, ParsesLongVersionFlag) { expectVersion(cli::parse(L"wsudo --version")); }
 
 TEST(ParserTest, IgnoresExtraArgumentsAfterHelpFlag) {
-    wchar_t executable[] = L"wsudo";
-    wchar_t flag[] = L"-h";
-    wchar_t extra[] = L"ignored";
-    wchar_t* argv[] = {executable, flag, extra};
-
-    cli::Arguments arguments = cli::parse(3, argv);
-
-    EXPECT_TRUE(arguments.help);
-    EXPECT_TRUE(arguments.command.empty());
+    expectHelp(cli::parse(L"wsudo -h ignored"));
 }
 
 TEST(ParserTest, IgnoresExtraArgumentsAfterVersionFlag) {
-    wchar_t executable[] = L"wsudo";
-    wchar_t flag[] = L"-v";
-    wchar_t extra[] = L"ignored";
-    wchar_t* argv[] = {executable, flag, extra};
-
-    cli::Arguments arguments = cli::parse(3, argv);
-
-    EXPECT_TRUE(arguments.version);
-    EXPECT_TRUE(arguments.command.empty());
+    expectVersion(cli::parse(L"wsudo -v ignored"));
 }

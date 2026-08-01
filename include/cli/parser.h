@@ -12,6 +12,6 @@ struct Arguments {
     bool version = false;
 };
 
-Arguments parse(int argc, wchar_t* argv[]);
+Arguments parse(const std::wstring& commandLine, bool debug = false);
 
 } // namespace cli
