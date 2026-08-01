@@ -1,46 +1,64 @@
 #include "cli/parser.h"
-#include <cstddef>
 #include <stdexcept>
 #include <string>
-#include <vector>
 
 namespace cli {
 
 namespace {
 
-std::vector<std::wstring> split(int argc, wchar_t* argv[]) {
-    std::vector<std::wstring> arguments;
+bool isSpace(wchar_t character) { return character == L' ' || character == L'\t'; }
 
-    for (int i = 1; i < argc; i++) {
-        arguments.push_back(argv[i]);
+std::size_t findTokenEnd(const std::wstring& commandLine) {
+    std::size_t position = 0;
+
+    if (!commandLine.empty() && commandLine[0] == L'"') {
+        position = commandLine.find(L'"', 1);
+        return position == std::wstring::npos ? commandLine.size() : position + 1;
     }
 
-    return arguments;
+    while (position < commandLine.size() && !isSpace(commandLine[position])) {
+        position++;
+    }
+
+    return position;
 }
 
-std::wstring join(const std::vector<std::wstring>& arguments, std::size_t startOffset = 0) {
-    std::wstring combined;
+std::wstring leadingToken(const std::wstring& commandLine) {
+    std::wstring token = commandLine.substr(0, findTokenEnd(commandLine));
 
-    for (std::size_t i = startOffset; i < arguments.size(); i++) {
-        if (i != startOffset) {
-            combined += L" ";
-        }
-
-        combined += arguments[i];
+    if (token.size() >= 2 && token.front() == L'"' && token.back() == L'"') {
+        return token.substr(1, token.size() - 2);
     }
 
-    return combined;
+    if (token.size() == 1 && token.front() == L'"') {
+        return L"";
+    }
+
+    return token;
+}
+
+std::wstring stripLeadingToken(const std::wstring& commandLine) {
+    std::size_t position = findTokenEnd(commandLine);
+
+    while (position < commandLine.size() && isSpace(commandLine[position])) {
+        position++;
+    }
+
+    return commandLine.substr(position);
 }
 
 } // namespace
 
-Arguments parse(int argc, wchar_t* argv[]) {
+Arguments parse(const std::wstring& commandLine, bool debug) {
     Arguments arguments;
-    std::vector<std::wstring> splitArguments = split(argc, argv);
-    std::wstring argument0 = splitArguments.empty() ? L"" : splitArguments[0];
+    std::wstring rest = stripLeadingToken(commandLine);
+    rest = debug ? stripLeadingToken(rest) : rest;
+
+    std::wstring argument0 = leadingToken(rest);
+    bool onlyArgument = stripLeadingToken(rest).empty();
     std::wstring backendPipePrefix = LR"(\\.\pipe\wsudo\)";
 
-    if (splitArguments.size() == 1 && argument0.starts_with(backendPipePrefix)) {
+    if (onlyArgument && argument0.starts_with(backendPipePrefix)) {
         if (argument0.size() == backendPipePrefix.size()) {
             throw std::runtime_error("Invalid pipe name");
         }
@@ -52,7 +70,7 @@ Arguments parse(int argc, wchar_t* argv[]) {
     } else if (argument0 == L"-v" || argument0 == L"--version") {
         arguments.version = true;
     } else {
-        arguments.command = join(splitArguments);
+        arguments.command = rest;
     }
 
     return arguments;

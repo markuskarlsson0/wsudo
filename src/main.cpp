@@ -5,16 +5,17 @@
 #include "cli/version.h"
 #include "utils/debug.h"
 #include "utils/log.h"
+#include <Windows.h>
 #include <exception>
 
 int wmain(int argc, wchar_t* argv[]) try {
-    bool debug = utils::consumeDebugFlag(argc, argv);
+    bool debug = utils::checkDebugFlag(argc, argv);
 
     if (debug) {
         utils::waitForDebugger();
     }
 
-    cli::Arguments arguments = cli::parse(argc, argv);
+    cli::Arguments arguments = cli::parse(GetCommandLineW(), debug);
 
     if (arguments.help) {
         cli::help();

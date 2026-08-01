@@ -12,16 +12,12 @@ void waitForDebugger() {
     DebugBreak();
 }
 
-bool consumeDebugFlag([[maybe_unused]] int& argc, [[maybe_unused]] wchar_t**& argv) {
+bool checkDebugFlag([[maybe_unused]] int argc, [[maybe_unused]] wchar_t** argv) {
 #ifdef WSUDO_DEBUG_BUILD
-    if (argc > 1 && std::wstring_view(argv[1]) == L"--debug") {
-        argc -= 1;
-        argv += 1;
-        return true;
-    }
-#endif
-
+    return argc > 1 && std::wstring_view(argv[1]) == L"--debug";
+#else
     return false;
+#endif
 }
 
 } // namespace utils
